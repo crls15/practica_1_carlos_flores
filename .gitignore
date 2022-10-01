@@ -2,6 +2,8 @@ utils/secret.dart
 lib/utils/secret.dart
 secret.dart
 
+secret.*
+
 # Miscellaneous
 *.class
 *.log
