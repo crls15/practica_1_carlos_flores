@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:practica_1_carlos_flores/home/hearing_button.dart';
 import 'package:practica_1_carlos_flores/home/song_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:practica_1_carlos_flores/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../favorites_songs/favorites_page.dart';
 
@@ -44,17 +46,34 @@ class _HomePageState extends State<HomePage> {
               CircleAvatar(
                 backgroundColor: Colors.white,
                 child: IconButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
+                    var favorite_songs = await SongProvider().getFavorites();
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => FavoritesPage(),
+                        builder: (context) => FavoritesPage(
+                          favorite_songs: favorite_songs,
+                        ),
                       ),
                     );
                   },
                   icon: Icon(Icons.favorite),
                   color: Colors.black,
                 ),
-              )
+              ),
+              SizedBox(
+                width: 16,
+              ),
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: IconButton(
+                  onPressed: () async {
+                    BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
+                  },
+                  icon: Icon(Icons.power_off),
+                  color: Colors.black,
+                ),
+              ),
             ],
           ),
         ],

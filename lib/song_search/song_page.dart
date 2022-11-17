@@ -6,13 +6,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../home/song_provider.dart';
 import '../song/Song.dart';
 
-class SongPage extends StatelessWidget {
+class SongPage extends StatefulWidget {
   final Song song;
   const SongPage({
     Key? key,
     required this.song,
   }) : super(key: key);
 
+  @override
+  State<SongPage> createState() => _SongPageState();
+}
+
+class _SongPageState extends State<SongPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +42,7 @@ class SongPage extends StatelessWidget {
               maxHeight: 400,
             ),
             child: Image.network(
-              '${song.imageURL}',
+              '${widget.song.imageURL}',
               fit: BoxFit.fill,
             ),
           ),
@@ -48,7 +53,7 @@ class SongPage extends StatelessWidget {
             ),
             child: Column(children: [
               Text(
-                '${song.title}',
+                '${widget.song.title}',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -56,7 +61,7 @@ class SongPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '${song.album}',
+                '${widget.song.album}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -64,7 +69,7 @@ class SongPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '${song.artist}',
+                '${widget.song.artist}',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -72,7 +77,7 @@ class SongPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '${song.release_date}',
+                '${widget.song.release_date}',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w300,
@@ -96,17 +101,17 @@ class SongPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 UrlButton(
-                  url: song.spotifyURL,
+                  url: widget.song.spotifyURL,
                   icon_image_path: 'assets/images/spotifyLogo.png',
                   destiny_name: 'Spotify',
                 ),
                 UrlButton(
-                  url: song.generalURL,
+                  url: widget.song.generalURL,
                   icon_image_path: 'assets/images/podcastLogo.png',
                   destiny_name: 'Web',
                 ),
                 UrlButton(
-                  url: song.appleMusicURL,
+                  url: widget.song.appleMusicURL,
                   icon_image_path: 'assets/images/appleLogo.png',
                   destiny_name: 'Web',
                 ),
@@ -119,13 +124,21 @@ class SongPage extends StatelessWidget {
   }
 
   Future<void> _showMyDialog(context) async {
+    List<Song> favorite_songs = await SongProvider().getFavorites();
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        List<Song> favorite_songs = context.read<SongProvider>().songs_list;
+        bool flag = false;
 
-        if (favorite_songs.contains(song)) {
+        for (var fav_song in favorite_songs) {
+          if (fav_song.title == widget.song.title) {
+            flag = true;
+            break;
+          }
+        }
+
+        if (flag) {
           return AlertDialog(
             title: const Text('Quitar de favoritos'),
             content: SingleChildScrollView(
@@ -145,7 +158,7 @@ class SongPage extends StatelessWidget {
               TextButton(
                 child: const Text('Aceptar'),
                 onPressed: () {
-                  context.read<SongProvider>().deleteFromFavorites(song);
+                  context.read<SongProvider>().deleteFromFavorites(widget.song);
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
@@ -180,7 +193,7 @@ class SongPage extends StatelessWidget {
             TextButton(
               child: const Text('Aceptar'),
               onPressed: () {
-                context.read<SongProvider>().addToFavorites(song);
+                context.read<SongProvider>().addToFavorites(widget.song);
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(

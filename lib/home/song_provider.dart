@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:practica_1_carlos_flores/home/http_requests.dart';
 import 'package:record/record.dart';
@@ -15,16 +17,74 @@ class SongProvider with ChangeNotifier {
   bool animationOn = false;
   String topString = 'Toque para escuchar';
 
-  List<Song> songs_list = <Song>[];
+  // List<Song> songs_list = <Song>[];
 
-  void addToFavorites(Song song) {
-    songs_list.add(song);
+  void addToFavorites(Song song) async {
+    Map<String, dynamic> song_map = {
+      'artist': song.artist,
+      'title': song.title,
+      'album': song.album,
+      'release_date': song.release_date,
+      'imageURL': song.imageURL,
+      'appleMusicURL': song.appleMusicURL,
+      'spotifyURL': song.spotifyURL,
+      'generalURL': song.generalURL
+    };
+
+    var user = FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+
+    var favorite_songs = user.collection("favorite_songs");
+    await favorite_songs.add(song_map);
+
+    // songs_list.add(song);
     notifyListeners();
   }
 
-  void deleteFromFavorites(Song song) {
-    songs_list.remove(song);
+  void deleteFromFavorites(Song song) async {
+    var user = FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+
+    QuerySnapshot<Map<String, dynamic>> favorite_songs =
+        await user.collection("favorite_songs").get();
+
+    for (var doc in favorite_songs.docs) {
+      if (doc["title"] == song.title) {
+        await doc.reference.delete();
+      }
+    }
     notifyListeners();
+  }
+
+  Future<List<Song>> getFavorites() async {
+    var user = FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+
+    QuerySnapshot<Map<String, dynamic>> favorite_songs =
+        await user.collection("favorite_songs").get();
+
+    List<Song> favorite_songs_list = [];
+
+    for (var doc in favorite_songs.docs) {
+      favorite_songs_list.add(
+        Song(
+          album: doc.data()['album'],
+          artist: doc.data()['artist'],
+          title: doc.data()['title'],
+          release_date: doc.data()['release_date'],
+          imageURL: doc.data()['imageURL'],
+          appleMusicURL: doc.data()['appleMusicURL'],
+          spotifyURL: doc.data()['spotifyURL'],
+          generalURL: doc.data()['generalURL'],
+        ),
+      );
+      // favorite_songs_list.add(Song.fromJson(doc.data()));
+    }
+    notifyListeners();
+    return favorite_songs_list;
   }
 
   void changeAnimationOn() {

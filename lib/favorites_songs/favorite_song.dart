@@ -6,13 +6,18 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../home/song_provider.dart';
 
-class FavoriteSong extends StatelessWidget {
+class FavoriteSong extends StatefulWidget {
   final Song? song;
   const FavoriteSong({
     Key? key,
     required this.song,
   }) : super(key: key);
 
+  @override
+  State<FavoriteSong> createState() => _FavoriteSongState();
+}
+
+class _FavoriteSongState extends State<FavoriteSong> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,13 +28,13 @@ class FavoriteSong extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         child: GestureDetector(
           onTap: () {
-            _launchInBrowser(context, song?.generalURL);
+            _launchInBrowser(context, widget.song?.generalURL);
           },
           child: Stack(
             children: [
               Positioned(
                 child: Image.network(
-                  '${song?.imageURL}',
+                  '${widget.song?.imageURL}',
                   fit: BoxFit.fill,
                 ),
               ),
@@ -51,7 +56,7 @@ class FavoriteSong extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            '${song?.title}',
+                            '${widget.song?.title}',
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 18,
@@ -59,7 +64,7 @@ class FavoriteSong extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${song?.artist}',
+                            '${widget.song?.artist}',
                             style: TextStyle(
                               fontWeight: FontWeight.w300,
                               fontSize: 14,
@@ -110,7 +115,7 @@ class FavoriteSong extends StatelessWidget {
             TextButton(
               child: const Text('Aceptar'),
               onPressed: () {
-                context.read<SongProvider>().deleteFromFavorites(song!);
+                context.read<SongProvider>().deleteFromFavorites(widget.song!);
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(
